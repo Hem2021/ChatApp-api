@@ -23,10 +23,10 @@ const app = express();
 app.use(cors());
 
 // Handle pre-flight requests
-app.options('*', cors());
+app.use(cors({ origin: 'https://chatappfrontend-yy97.onrender.com' }));
+// app.options('*', cors());
 app.use(express.json());
 
-// app.use(cors({ origin: 'http://127.0.0.1:4000' }));
 
 app.get('/', (req, res) => {
     res.send('I am live now');
