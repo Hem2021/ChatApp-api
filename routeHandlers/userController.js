@@ -71,7 +71,7 @@ const login = asyncHandler(async (req, res) => {
 const getAllUsers = asyncHandler(async (req, res) => {
     try {
         const search_key = req.query.search;
-        console.log(search_key);
+        console.log("search query in online users : ",search_key);
         const keyword = search_key
             ? {
                 $or: [
@@ -86,7 +86,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
     }
     catch (e) {
         res.status(400).send('sth went wrong in the db query');
-        throw new Error('sth went wrong in the db query')
+        // throw new Error('sth went wrong in the db query')
     }
 })
 

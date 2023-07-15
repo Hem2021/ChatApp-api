@@ -23,7 +23,7 @@ const app = express();
 app.use(cors());
 
 // Handle pre-flight requests
-app.use(cors({ origin: 'https://chatappfrontend-yy97.onrender.com' }));
+app.use(cors({ origin: ['https://chatappfrontend-yy97.onrender.com', 'http://localhost:3000'] }));
 // app.options('*', cors());
 app.use(express.json());
 
@@ -56,14 +56,14 @@ const io = require("socket.io")(server, {
 
 var chatRoom = '';
 var allUsers = []
-var temp = [];
+var onlineUsers = [];
 io.on("connection", (socket) => {
     console.log("socket connection established");
     socket.on("setup", (user) => {
         socket.join(user._id) //check validity
         console.log(user.name, 'user connected 🟢')
-        temp.push({ id: socket.id, name: user.name });
-        console.log("online users : ", temp);
+        onlineUsers.push({ id: socket.id, name: user.name, user_id: user._id });
+        console.log("online users : ", onlineUsers);
         socket.emit("connected");
     });
     socket.on("join chat", (data) => {
@@ -80,7 +80,7 @@ io.on("connection", (socket) => {
 
     socket.on("new message", (newMessageRecieved) => {
         var chat = newMessageRecieved.chat;
-        console.log(newMessageRecieved);
+        console.log("new message : ", newMessageRecieved);
 
         if (!chat.users) return console.log("chat.users not defined");
 
@@ -91,16 +91,20 @@ io.on("connection", (socket) => {
         });
     });
 
-    socket.on("typing", (room) => socket.in(room).emit("typing"));
+    socket.on('get active users', () => {
+        socket.emit('all active users', onlineUsers);
+    })
+
+    socket.on("typing", (room) => socket.broadcast.in(room).emit("typing"));
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
 
     socket.on('disconnect', () => {
-        var disconnectedUser = temp.filter((data) => data.id === socket.id);
+        var disconnectedUser = onlineUsers.filter((data) => data.id === socket.id);
         console.log(disconnectedUser, ' user disconnected! 🔴');
-        temp = temp.filter((data) => data.id != socket.id);
+        onlineUsers = onlineUsers.filter((data) => data.id != socket.id);
         allUsers = allUsers.filter((data) => data.id != socket.id);
-        console.log(" 👨user disconnected! current socket details : ", temp);
+        console.log(" 👨user disconnected! current socket details : ", onlineUsers);
 
         console.log("👨‍👩‍👦 current group-socket details : ", allUsers);
     })
