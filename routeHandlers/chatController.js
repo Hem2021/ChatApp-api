@@ -5,6 +5,7 @@ const User = require('../models/userModel');
 const { default: mongoose } = require('mongoose');
 const accessChat = async (req, res) => {
     const { id } = req.body;
+    console.log('inside access chat route : id :', id)
     if (!id) {
         return res.send('No user selected for chat');
     }
@@ -81,15 +82,29 @@ const fetchChat = async (req, res) => {
 
 const deleteChat = async (req, res) => {
     const { chat_id } = req.body;
-    if (!chat_id) res.send('Please select a chat to delete');
+    console.log("CHat id to del : ", chat_id)
+    if (!chat_id) return res.json({ success: false, message: 'Please select a chat to delete' });
 
-    const exists = await Chat.findById(chat_id);
-    if (!exists.length) res.send("No chat exists");
+    try {
+        // chat_id = chat_id+'c';
+        console.log("new : ", chat_id);
+        // const exists = await Chat.findById(chat_id);
+        // console.log("chat exists : ", exists);
+        // if (!exists) return res.json({ success: false, message: "No chat exists" });
 
-    const result = await Chat.deleteOne(chat_id)
+        const result = await Chat.deleteOne({ _id: chat_id })
+        if (result.deletedCount)
+            return res.json({ success: true, message: "Successfully deleted !" });
+        else {
+            return res.json({ success: false, message: "No chat exists" });
+        }
 
 
-
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(400).json({ success: false, message: "something went wrong. Try Again!" });
+    }
 }
 
 const createGroup = async (req, res) => {
@@ -287,4 +302,4 @@ const addToGroup = asyncHandler(async (req, res) => {
 // }
 
 
-module.exports = { accessChat, fetchChat, createGroup, renameGroup, addToGroup, removeFromGroup }
+module.exports = { accessChat, fetchChat, createGroup, renameGroup, addToGroup, removeFromGroup, deleteChat }
