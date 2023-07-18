@@ -4,7 +4,6 @@ dotenv.config();   //moved up
 const { chats } = require('./data/data');
 const connectDB = require('./config/db')    //commented
 const cors = require('cors')
-const path = require('path')
 
 //added
 // require('./config/db.js');
@@ -32,7 +31,9 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'build')));
 
-
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 
 
@@ -44,11 +45,6 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/message', messageRoutes);
-
-app.get('/*', function (req, res) {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
-
 
 
 //handling invalid urls
