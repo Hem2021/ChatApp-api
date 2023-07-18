@@ -4,6 +4,7 @@ dotenv.config();   //moved up
 const { chats } = require('./data/data');
 const connectDB = require('./config/db')    //commented
 const cors = require('cors')
+const path = require('path')
 
 //added
 // require('./config/db.js');
@@ -19,6 +20,8 @@ connectDB(); //commented
 
 const app = express();
 
+
+
 // Enable CORS for all routes
 app.use(cors());
 
@@ -26,6 +29,11 @@ app.use(cors());
 app.use(cors({ origin: ['https://chatappfrontend-yy97.onrender.com', 'http://localhost:3000'] }));
 // app.options('*', cors());
 app.use(express.json());
+
+app.use(express.static(path.join(__dirname, 'build')));
+
+
+
 
 
 app.get('/', (req, res) => {
@@ -36,6 +44,11 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/message', messageRoutes);
+
+app.get('/*', function (req, res) {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
 
 
 //handling invalid urls
@@ -60,8 +73,9 @@ var onlineUsers = [];
 io.on("connection", (socket) => {
     console.log("socket connection established");
     socket.on("setup", (user) => {
-        socket.join(user._id) //check validity
-        console.log(user.name, 'user connected 🟢')
+        if (!user) return;
+        socket.join(user?._id) //check validity
+        console.log(user?.name, 'user connected 🟢')
         onlineUsers.push({ id: socket.id, name: user.name, user_id: user._id });
         console.log("online users : ", onlineUsers);
         socket.emit("connected");
